@@ -1,0 +1,125 @@
+* {
+    margin:0;
+    padding:0;    
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.card-one {
+    position: relative;
+    width: 350px;
+    height: 550px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.weather-widget {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.date-display {
+    margin-top: 120px;
+    text-align: center;
+    font-size: 19px;
+    font-weight: bold;
+    color: #333;
+}
+
+.session-info {
+    margin-top: 25px;
+    text-align: center;
+    background: #f9fafc;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+#session-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+#session-time {
+    font-size: 18px;
+    font-weight: 600;
+    color: #c40d9c;
+    margin-bottom: 6px;
+}
+
+#session-location {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 14px;
+}
+
+/* Action button styling */
+.session-action {
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+}
+
+.session-action button {
+    background: #0b6ef6;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.session-action button:hover {
+    background: #094db8;
+    transform: scale(1.05);
+}
+
+/*Rest-day styling toggle*/
+.session-info.rest {
+    background: #fff5f5;
+    box-shadow: 0 2px 6px rgba(230,57,70,0.15);
+    border: 1px solid #fde2e2;
+}
+
+.session-rest-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #c53030;                    /* deep red */
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.session-rest-msg {
+  font-size: 14px;
+  color: #6b3030;
+}
+
+/* Hide action area when rest day (optional) */
+.session-info.rest .session-action {
+  display: none;
+}
