@@ -8,9 +8,9 @@
 </head>
 <body>
     <div class="card-one">
-       <div class="weather-widget">Loading...</div>
+       <div class="weather-widget" aria-live="polite">Loading...</div>
 
-       <div class="date-display" id="date">
+       <div class="date-display" id="date" aria-live="polite">
          Thu, Apr 24
        </div>
        <div class="session-info">
@@ -21,6 +21,14 @@
             <button id="join-button" type="button">I'm in</button>
         </div>
        </div>
+
+       <!-- Session Agenda / Description -->
+        <section class="session-agenda" id="sessionAgenda">
+            <h4 class="agenda-title">Agenda</h4>
+            <ul class="agenda-list" id="agendaList"></ul>
+            <p class="agenda-notes" id="agendaNotes"></p>
+        </section>
+            
     </div>
     <script src="js/script.js"></script>
 </body>

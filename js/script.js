@@ -34,10 +34,52 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
         title: "Training & Open Play",
         time: "4:00 PM - 6:00 PM",
         location: "The Village Sports Club",
-        restMessage: "No session today. Recover well and come back stronger! 💪"
+        restMessage: "No session today. Recover well and come back stronger! 💪",
+
+        // New: agenda & notes (admin-controllable later)
+        agenda: [
+            "Dynamic warm-up & mobility drills (10m)",
+            "First-touch rondos (20m)",
+            "Finishing drills (20m)",
+            "Small-sided games (30m)"
+        ],
+        notes: "Wear official kampilan training-kit."
     };
 
     /*Render function*/
+    function renderAgenda(data) {
+        const agendaWrap = document.getElementById("sessionAgenda");
+        const list = document.getElementById("agendaList");
+        const notes = document.getElementById("agendaNotes");
+
+        if (!data.isTrainingDay) {
+            agendaWrap.style.display = "none"; // Hide agenda section on rest days
+            return;
+        }
+
+        // show agenda section 
+        agendaWrap.style.display = "";
+
+        // Populate agenda list
+        list.innerHTML = "";
+        if (Array.isArray(data.agenda) && data.agenda.length) {
+            data.agenda.forEach(item => {
+                const li = document.createElement("li");
+                li.textContent = item;
+                list.appendChild(li);
+            });
+        } else {
+            // graceful empty state
+            const li = document.createElement("li");
+            li.textContent = "Agenda to be announced.";
+            list.appendChild(li);
+        }
+        
+        // notes (optional)
+        notes.textContent = data.notes || "";
+    }
+
+
     function renderSessionCard(data) {
         const info = document.querySelector(".session-info");
         const titleEl = document.getElementById("session-title");
@@ -65,6 +107,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
     }
 
     renderSessionCard(session);
+    renderAgenda(session);
 
 
     /* Join Button Functionality */

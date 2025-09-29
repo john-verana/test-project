@@ -123,3 +123,57 @@ body {
 .session-info.rest .session-action {
   display: none;
 }
+
+/* Session Agenda Section */
+.session-agenda {
+    margin-top: 16px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    border: 1px solid #eef1f6;
+}
+
+.agenda-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+}
+
+.agenda-list {
+    list-style: none;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.agenda-list li {
+    position: relative;
+    padding-left: 22px;
+    margin: 6px 0;
+    color: #333;
+    font-size: 14px;
+}
+
+/* little bullet accent */
+.agenda-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #0b6ef6;
+  box-shadow: 0 0 0 3px rgba(11,110,246,0.12);
+}
+
+.agenda-notes {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Hide agenda when it's a rest day */
+.session-info.rest + .session-agenda { display: none; }
