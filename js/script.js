@@ -1,5 +1,5 @@
 const apiKey = "01c96143ca17e347929f8cc6e0bcf4e5";
-const city = "Las Pinas,PH";
+const city = "Paranaque, PH";
 fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
     .then(response => response.json())
     .then(data => {
@@ -18,7 +18,54 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
         `;
     })
     .catch(error => console.error("Error fetching weather:", error));
+
+// --- Forecast weather for tomorrow (card 2) --- 
+    function updateTomorrowWeather () {
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+            // Tomorrow's date string
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            // Find forecast closest to noon tomorrow
+            const forecastList = data.list;
+            let best = null;
+            let bestDiff = Infinity;
+            const target = new Date(`${tomorrowStr}T12:00:00`);
+
+            forecastList.forEach(item => {
+                const itemDate = new Date(item.dt_txt);
+                if (itemDate.toISOString().startsWith(tomorrowStr)) {
+                    const diff = Math.abs(itemDate - target);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        best = item; 
+                    }
+                }
+            });
+
+            if (best) {
+                const temp = Math.round(best.main.temp);
+                const weather = best.weather[0].main;
+                const icon = best.weather[0].icon;
+                const location = `${data.city.name},${data.city.country}`;
+
+                const widget = document.getElementById('weather-1');
+                widget.innerHTML = `
+                <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
+                <p>${temp}°C, ${weather}</p>
+                <small>${location}</small>
+                `;
+            }
+        })
+        .catch(error => console.error("Error fetching forecast:", error));
+    }
     
+    updateTomorrowWeather();
+        
+        
 /* Date Information */
     function updateDate() {
         const today = new Date();
@@ -27,25 +74,50 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
     }
 
     updateDate();
+
+    // --- Tomorrow's date for the second card --- 
+    function updateTomorrowDate() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const options = { weekday: 'short', month: 'short', day: 'numeric'};
+        document.getElementById("date-1").textContent = tomorrow.toLocaleDateString('en-US', options);
+    }
+
+    updateTomorrowDate();
     
 /* Session Information */
-    const session = {
-        isTrainingDay: true,        // Change this to true or false to toggle modes
-        title: "Training & Open Play",
-        time: "4:00 PM - 6:00 PM",
-        location: "The Village Sports Club",
-        restMessage: "No session today. Recover well and come back stronger! 💪",
-
-        // New: agenda & notes (admin-controllable later)
-        agenda: [
-            "Dynamic warm-up & mobility drills (10m)",
-            "First-touch rondos (20m)",
-            "Finishing drills (20m)",
-            "Small-sided games (30m)"
-        ],
-        notes: "Wear official kampilan training-kit."
-    };
-
+    const session = [
+        {
+            // card 0: today 
+            isTrainingDay: true,
+            title: "Training & Open Play",
+            time: "4:00 PM - 6:00 PM",
+            location: "The Village Sports Club",
+            restMessage: "No session today. Recover well and come back stronger! 💪",
+            agenda: [
+                "Dynamic warm-up & ball control",
+                "Passing drills",
+                "Scrimmage game",
+            ],
+            notes: "Wear official home kit."
+        },
+        {
+            // card 1: tomorrow 
+            isTrainingDay: true,  // Change this to true or false to toggle modes
+            title: "Training & Open Play",
+            time: "4:00 PM - 7:00 PM",
+            location: "BGC turf",
+            restMessage: "Rest day tomorrow. Focus on recovery! 🛌",
+            agenda: [
+                "Tactical positioning",
+                "Finishing practice",
+                "Small-sided games"
+            ],
+            notes: "Wear blue and white."
+        }
+    ];
+     
     /*Render function*/
     function renderAgenda(data) {
         const agendaWrap = document.getElementById("sessionAgenda");
