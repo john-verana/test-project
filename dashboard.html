@@ -1,35 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div class="card-one">
-       <div class="weather-widget" aria-live="polite">Loading...</div>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="slider">
+      <div class="slider-track" id="sliderTrack">
+        <!-- Card 0: TODAY (original card) -->
+        <div class="card-one">
+          <div class="weather-widget" aria-live="polite">Loading...</div>
 
-       <div class="date-display" id="date" aria-live="polite">
-         Thu, Apr 24
-       </div>
-       <div class="session-info">
-        <h3 id="session-title"></h3>
-        <p id="session-time"></p>
-        <p id="session-location"></p>
-        <div class="session-action" id="sessionAction">
-            <button id="join-button" type="button">I'm in</button>
-        </div>
-       </div>
+          <div class="date-display" id="date" aria-live="polite">
+            Thu, Apr 24
+          </div>
 
-       <!-- Session Agenda / Description -->
-        <section class="session-agenda" id="sessionAgenda">
-            <h4 class="agenda-title">Agenda</h4>
+          <div class="session-info">
+            <h3 id="session-title"></h3>
+            <p id="session-time"></p>
+            <p id="session-location"></p>
+            <div class="session-action" id="sessionAction">
+              <button id="join-button" type="button">I'm in</button>
+            </div>
+          </div>
+
+          <!-- Session Agenda / Description -->
+          <div class="session-agenda" id="sessionAgenda">
+            <div class="agenda-title">Agenda</div>
             <ul class="agenda-list" id="agendaList"></ul>
             <p class="agenda-notes" id="agendaNotes"></p>
-        </section>
-            
+          </div>
+        </div>
+        <!-- /card-one (today) -->
+
+        <!-- Card 1: TOMORROW -->
+        <div class="card-one">
+          <div class="weather-widget" aria-live="polite">Loading...</div>
+
+          <div class="date-display" id="date-1" aria-live="polite">--</div>
+
+          <div class="session-info" id="session-1">
+            <h3 id="session-title-1"></h3>
+            <p id="session-time-1"></p>
+            <p id="session-location-1"></p>
+            <div class="session-action" id="sessionAction-1">
+              <button id="join-button-1" type="button">I'm in</button>
+            </div>
+          </div>
+
+          <div class="session-agenda" id="sessionAgenda-1">
+            <div class="agenda-title">Agenda</div>
+            <ul class="agenda-list" id="agendaList-1"></ul>
+            <p class="agenda-notes" id="agendaNotes-1"></p>
+          </div>
+        </div>
+        <!-- /card-one (tomorrow) -->
+      </div>
+      <!-- /slider-track -->
+
+      <!-- Pagination dots (sibling of slider-track) -->
+      <div class="dots">
+        <button class="dot active" data-slide="0" aria-label="Today"></button>
+        <button class="dot" data-slide="1" aria-label="Tomorrow"></button>
+      </div>
     </div>
+
     <script src="js/script.js"></script>
-</body>
+  </body>
 </html>

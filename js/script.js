@@ -113,13 +113,41 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
     /* Join Button Functionality */
     const joinButton = document.getElementById("join-button");
 
+    // restore previous choice
+    const saved = localStorage.getItem('rsvp');
+    if (saved === 'in') setJoinState(true);
+
     joinButton.addEventListener("click", () => {
-        if (joinButton.textContent === "I'm in") {
-            joinButton.textContent = "Cancel";
-            joinButton.style.background = "#e63946"; // Change to red
-        } else {
-            joinButton.textContent = "I'm in";
-            joinButton.style.background = "#0b6ef6"; // Change back to original color
-        }
+        const next = joinButton.textContent === "I'm in";
+        setJoinState(next);
+        localStorage.setItem('rsvp', next ? 'in' : 'out');
     });
 
+    function setJoinState(going) {
+        if (going) {
+            joinButton.textContent = "Cancel";
+            joinButton.style.background = "#e63946"; // Change to red
+            joinButton.setAttribute('aria-pressed', 'true');
+        } else {
+            joinButton.textContent = "I'm in";
+            joinButton.style.background = "#0b6ef6" // Change back to original color
+            joinButton.setAttribute('aria-pressed', 'false');
+        }
+    }
+
+    // --- Minimal slider for 2 cards --- 
+    const track = document.getElementById('sliderTrack');
+    const dots = Array.from(document.querySelectorAll('.dot'));
+    let currentSlide = 0; 
+
+    function slideTo(idx) {
+        currentSlide = idx;
+        track.style.transform = `translateX(-${idx * 350}px)`; // 350 = card width
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    dots.forEach(d => {
+        d.addEventListener('click', () => slideTo(+d.dataset.slide));
+});
+
+  

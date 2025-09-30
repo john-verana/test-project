@@ -177,3 +177,38 @@ body {
 
 /* Hide agenda when it's a rest day */
 .session-info.rest + .session-agenda { display: none; }
+
+/*Slider shellet*/
+.slider {
+    width: 350px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.slider-track {
+    display: flex;
+    transition: transform 0.35s ease;
+    will-change: transform;
+}
+
+/* Make each card take full slider width */
+.slider-track .card-one {
+    flex: 0 0 350px; /* Match slider width */
+    margin: 0; 
+}
+
+/* Dots */
+.dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: #cbd5e1;
+}
+
+.dot.active { background: #0b6ef6; }
