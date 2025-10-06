@@ -13,7 +13,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
 
         widget.innerHTML = `
         <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
-        <p>${temp}°C, ${weather}</p>
+        <p>${temp}&deg;C, ${weather}</p>
         <small>${location}</small>
         `;
     })
@@ -50,20 +50,48 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
                 const temp = Math.round(best.main.temp);
                 const weather = best.weather[0].main;
                 const icon = best.weather[0].icon;
-                const location = `${data.city.name},${data.city.country}`;
+                const location = `${data.city.name}, ${data.city.country}`;
 
                 const widget = document.getElementById('weather-1');
                 widget.innerHTML = `
                 <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
-                <p>${temp}°C, ${weather}</p>
+                <p>${temp}&deg;C, ${weather}</p>
                 <small>${location}</small>
                 `;
             }
         })
         .catch(error => console.error("Error fetching forecast:", error));
     }
-    
+
+    // Forecast weather day AfterTomorrow 
+    function updateDayAfterWeather(data) {
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`)
+        .then(res => res.json())
+        .then(data => {
+            const dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 2);
+            const targetDate = dayAfter.toISOString().split("T")[0];
+
+            const forecast = data.list.find(item => item.dt_txt.startsWith(targetDate + " 12:00:00"));
+            const widget = document.getElementById("weather-2");
+
+            if (forecast) {
+                const temp = Math.round(forecast.main.temp);
+                const weather = forecast.weather[0].main;
+                const icon = forecast.weather[0].icon;
+                const location = `${data.city.name}, ${data.city.country}`;
+                widget.innerHTML = `
+                <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
+                <p>${temp}&deg;C, ${weather}</p>
+                <small>${location}</small>
+                `;
+            }
+        })
+        .catch(err => console.error("Error fetching weather:", err));
+    }
+
     updateTomorrowWeather();
+    updateDayAfterWeather();
         
         
 /* Date Information */
@@ -85,6 +113,17 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
     }
 
     updateTomorrowDate();
+
+    // --- Day after tomorrow --- 
+    function updateDayAfterDate () {
+        const dayAfter = new Date();
+        dayAfter.setDate(dayAfter.getDate() + 2);
+
+        const options = { weekday: 'short', month: 'short', day: 'numeric'};
+        document.getElementById("date-2").textContent = dayAfter.toLocaleDateString('en-US', options);
+    }
+
+    updateDayAfterDate();
     
 /* Session Information */
     const session = [
@@ -94,7 +133,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
             title: "Training & Open Play",
             time: "4:00 PM - 6:00 PM",
             location: "The Village Sports Club",
-            restMessage: "No session today. Recover well and come back stronger! 💪",
+            restMessage: "No session today. Recover well and come back stronger! ðŸ’ª",
             agenda: [
                 "Dynamic warm-up & ball control",
                 "Passing drills",
@@ -108,13 +147,26 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
             title: "Training & Open Play",
             time: "4:00 PM - 7:00 PM",
             location: "BGC turf",
-            restMessage: "Rest day tomorrow. Focus on recovery! 🛌",
+            restMessage: "Rest day. Focus on recovery! ðŸ›Œ",
             agenda: [
                 "Tactical positioning",
                 "Finishing practice",
                 "Small-sided games"
             ],
             notes: "Wear blue and white."
+        },
+        {
+            isTrainingDay: true,
+            title: "Training & Open Play",
+            time: "4:00 PM - 6:00 PM",
+            location: "The Village Sports Club",
+            restMessage: "Rest Day! Do you own shi",
+            agenda: [
+                "Conditioning",
+                "Passing drills",
+                "5v5 small sided play",
+            ],
+            notes: "Wear pink kampilan kit."
         }
     ];
      
@@ -154,7 +206,10 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
         }
     }
 
-    session.forEach((s, i) => renderSessionCard(i, s));
+    session.forEach((s, i) => {
+        renderSessionCard(i, s);
+        wireJoinButton(i);
+    });
     
     /* Join Button Functionality */
     function wireJoinButton(idx) {
@@ -172,22 +227,91 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
         });
     }
 
-    // Call it for each card
-    [0,1].forEach(idx => wireJoinButton(idx));
-
-    // --- Minimal slider for 2 cards --- 
-    const track = document.getElementById('sliderTrack');
+    // ===== SLIDER CORE =====
+    const track = document.querySelector('.slider-track')
+    const slides = Array.from(track.children);
     const dots = Array.from(document.querySelectorAll('.dot'));
-    let currentSlide = 0; 
 
-    function slideTo(idx) {
-        currentSlide = idx;
-        track.style.transform = `translateX(-${idx * 350}px)`; // 350 = card width
-        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    let current = 0; 
+    let slideWidth = slides[0].getBoundingClientRect().width;
+
+    // Mouse drag setup 
+    let startX = 0; 
+    let currentX = 0; 
+    let isDragging = false; 
+    let deltaX = 0; 
+
+    function measure() {
+        // Recalculate width on resize so it stays responsive 
+        slideWidth = slides[0].getBoundingClientRect().width;
+        goTo(current, false); // reposition without animation 
     }
 
-    dots.forEach(d => {
-        d.addEventListener('click', () => slideTo(+d.dataset.slide));
-});
+    function goTo(index, animate = true) {
+        // Clamp between 0 and last slide 
+        current = Math.max(0, Math.min(index, slides.length - 1));
+        track.style.transition = animate ? 'transform 300ms ease' :  'none';
+        track.style.transform = `translateX(-${current * slideWidth}px)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i ===current));
+    }
 
-  
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    // Dots navigation 
+    dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+
+    //Keybaord arrows 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
+    });
+
+    // Mouse drag control 
+    const dragThreshold = 60; // pixels needed to trigger a slide change 
+
+    track.addEventListener('mousedown', (e) => {
+        isDragging = true; 
+        startX = e.clientX; 
+        currentX = startX;
+        track.style.transition = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return; 
+        currentX = e.clientX; 
+        deltaX = currentX - startX;
+
+        // move the track visually 
+        track.style.transform = `translateX(${ -current * slideWidth + deltaX }px)`;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!isDragging) return; 
+        isDragging = false;
+        track.style.transition = 'transform 0.3s ease'; 
+
+        // decide direction 
+        if (Math.abs(deltaX) > dragThreshold) {
+            if (deltaX > 0) goTo(current - 1); // dragged right -> previous slide 
+            else goTo(current + 1); // dragged left -> next slide 
+        } else {
+            goTo(current); // not enough movement -> snap back 
+        }
+
+        deltaX = 0; // reset for next drage 
+    }); 
+
+    // snap back if user leaves window mid-drag 
+    window.addEventListener('mouseleave', () => {
+        if (isDragging) {
+            isDragging = false;
+            track.style.transition = 'transform 0.3s ease'; 
+            goTo(current);
+            deltaX = 0; 
+        }
+    });
+   
+    // On load + on resize
+    window.addEventListener('resize', measure);
+    measure();

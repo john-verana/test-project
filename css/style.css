@@ -13,7 +13,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.card-one {
+.card {
     position: relative;
     width: 350px;
     height: 550px;
@@ -187,12 +187,17 @@ body {
 
 .slider-track {
     display: flex;
-    transition: transform 0.35s ease;
+    transition: transform 0.3s ease;
     will-change: transform;
+    cursor: grab;
+    user-select: none;
+}
+.slider-track:active {
+    cursor: grabbing;
 }
 
 /* Make each card take full slider width */
-.slider-track .card-one {
+.slider-track .card {
     flex: 0 0 350px; /* Match slider width */
     margin: 0; 
 }
