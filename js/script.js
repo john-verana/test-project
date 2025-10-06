@@ -1,4 +1,7 @@
-const apiKey = "01c96143ca17e347929f8cc6e0bcf4e5";
+const apiKey = window.OWM_KEY || "";
+if (!apiKey) {
+    console.error('Missing API key: please set window.OWM_KEY in config/config.js');
+}
 const city = "Paranaque, PH";
 fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
     .then(response => response.json())
@@ -133,7 +136,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
             title: "Training & Open Play",
             time: "4:00 PM - 6:00 PM",
             location: "The Village Sports Club",
-            restMessage: "No session today. Recover well and come back stronger! ðŸ’ª",
+            restMessage: "No session today. Recover well and come back stronger!",
             agenda: [
                 "Dynamic warm-up & ball control",
                 "Passing drills",
@@ -147,7 +150,7 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
             title: "Training & Open Play",
             time: "4:00 PM - 7:00 PM",
             location: "BGC turf",
-            restMessage: "Rest day. Focus on recovery! ðŸ›Œ",
+            restMessage: "Rest day. Focus on recovery!",
             agenda: [
                 "Tactical positioning",
                 "Finishing practice",
