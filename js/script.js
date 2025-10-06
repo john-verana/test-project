@@ -243,6 +243,8 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
     let currentX = 0; 
     let isDragging = false; 
     let deltaX = 0; 
+    let startTime = 0;
+    let swipeSpeed = 0; 
 
     function measure() {
         // Recalculate width on resize so it stays responsive 
@@ -313,6 +315,45 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
             goTo(current);
             deltaX = 0; 
         }
+    });
+
+    // ===== MOBILE TOUCH SUPPORT =====
+    track.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        startX = e.touches[0].clientX; 
+        currentX = startX; 
+        startTime = Date.now(); // capture time for speed calc 
+        track.style.transition = 'none';
+    }, {passive: true});
+
+    track.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        currentX = e.touches[0].clientX;
+        deltaX = currentX - startX; 
+        track.style.transform = `translateX(${ - current * slideWidth + deltaX }px)`;
+        e.preventDefault(); // stop vertical scroll
+    }, { passive: false });
+
+    track.addEventListener('touchend', () => {
+        if (!isDragging) return; 
+        isDragging = false; 
+
+        // calculate swipe speed 
+        const timeElapsed = Date.now() - startTime; 
+        swipeSpeed = Math.abs(deltaX / timeElapsed); // px/ms 
+
+        track.style.transition = 'transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)';
+
+        // momentum threshold: fast flick = move to next card 
+        const flickThreshold = 0.5; // try: 0.3-0.6 feels natural 
+
+        if (Math.abs(deltaX) > dragThreshold || swipeSpeed > flickThreshold) {
+            if (deltaX > 0 ) goTo(current - 1); // dragged right -> prev slide 
+            else goTo(current + 1) ; // dragged left -> next slide 
+        } else {
+            goTo(current);
+        }
+        deltaX = 0; 
     });
    
     // On load + on resize
