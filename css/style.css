@@ -13,7 +13,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.card-one {
+.card {
     position: relative;
     width: 350px;
     height: 550px;
@@ -52,7 +52,7 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
 }
 
-#session-title {
+.session-title {
     font-size: 16px;
     font-weight: 700;
     color: #222;
@@ -61,14 +61,14 @@ body {
     letter-spacing: 0.5px;
 }
 
-#session-time {
+.session-time {
     font-size: 18px;
     font-weight: 600;
     color: #c40d9c;
     margin-bottom: 6px;
 }
 
-#session-location {
+.session-location {
     font-size: 14px;
     color: #555;
     margin-bottom: 14px;
@@ -177,3 +177,43 @@ body {
 
 /* Hide agenda when it's a rest day */
 .session-info.rest + .session-agenda { display: none; }
+
+/*Slider shellet*/
+.slider {
+    width: 350px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.slider-track {
+    display: flex;
+    transition: transform 0.3s ease;
+    will-change: transform;
+    cursor: grab;
+    user-select: none;
+}
+.slider-track:active {
+    cursor: grabbing;
+}
+
+/* Make each card take full slider width */
+.slider-track .card {
+    flex: 0 0 350px; /* Match slider width */
+    margin: 0; 
+}
+
+/* Dots */
+.dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+}
+
+.dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: #cbd5e1;
+}
+
+.dot.active { background: #0b6ef6; }

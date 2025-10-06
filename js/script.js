@@ -1,5 +1,8 @@
-const apiKey = "01c96143ca17e347929f8cc6e0bcf4e5";
-const city = "Las Pinas,PH";
+const apiKey = window.OWM_KEY || "";
+if (!apiKey) {
+    console.error('Missing API key: please set window.OWM_KEY in config/config.js');
+}
+const city = "Paranaque, PH";
 fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
     .then(response => response.json())
     .then(data => {
@@ -13,12 +16,87 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
 
         widget.innerHTML = `
         <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
-        <p>${temp}°C, ${weather}</p>
+        <p>${temp}&deg;C, ${weather}</p>
         <small>${location}</small>
         `;
     })
     .catch(error => console.error("Error fetching weather:", error));
-    
+
+// --- Forecast weather for tomorrow (card 2) --- 
+    function updateTomorrowWeather () {
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`)
+        .then(response => response.json())
+        .then(data => {
+            // Tomorrow's date string
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            // Find forecast closest to noon tomorrow
+            const forecastList = data.list;
+            let best = null;
+            let bestDiff = Infinity;
+            const target = new Date(`${tomorrowStr}T12:00:00`);
+
+            forecastList.forEach(item => {
+                const itemDate = new Date(item.dt_txt);
+                if (itemDate.toISOString().startsWith(tomorrowStr)) {
+                    const diff = Math.abs(itemDate - target);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        best = item; 
+                    }
+                }
+            });
+
+            if (best) {
+                const temp = Math.round(best.main.temp);
+                const weather = best.weather[0].main;
+                const icon = best.weather[0].icon;
+                const location = `${data.city.name}, ${data.city.country}`;
+
+                const widget = document.getElementById('weather-1');
+                widget.innerHTML = `
+                <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
+                <p>${temp}&deg;C, ${weather}</p>
+                <small>${location}</small>
+                `;
+            }
+        })
+        .catch(error => console.error("Error fetching forecast:", error));
+    }
+
+    // Forecast weather day AfterTomorrow 
+    function updateDayAfterWeather(data) {
+        fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`)
+        .then(res => res.json())
+        .then(data => {
+            const dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 2);
+            const targetDate = dayAfter.toISOString().split("T")[0];
+
+            const forecast = data.list.find(item => item.dt_txt.startsWith(targetDate + " 12:00:00"));
+            const widget = document.getElementById("weather-2");
+
+            if (forecast) {
+                const temp = Math.round(forecast.main.temp);
+                const weather = forecast.weather[0].main;
+                const icon = forecast.weather[0].icon;
+                const location = `${data.city.name}, ${data.city.country}`;
+                widget.innerHTML = `
+                <img src="https://openweathermap.org/img/wn/${icon}.png" alt="${weather}" />
+                <p>${temp}&deg;C, ${weather}</p>
+                <small>${location}</small>
+                `;
+            }
+        })
+        .catch(err => console.error("Error fetching weather:", err));
+    }
+
+    updateTomorrowWeather();
+    updateDayAfterWeather();
+        
+        
 /* Date Information */
     function updateDate() {
         const today = new Date();
@@ -27,99 +105,216 @@ fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}
     }
 
     updateDate();
-    
-/* Session Information */
-    const session = {
-        isTrainingDay: true,        // Change this to true or false to toggle modes
-        title: "Training & Open Play",
-        time: "4:00 PM - 6:00 PM",
-        location: "The Village Sports Club",
-        restMessage: "No session today. Recover well and come back stronger! 💪",
 
-        // New: agenda & notes (admin-controllable later)
-        agenda: [
-            "Dynamic warm-up & mobility drills (10m)",
-            "First-touch rondos (20m)",
-            "Finishing drills (20m)",
-            "Small-sided games (30m)"
-        ],
-        notes: "Wear official kampilan training-kit."
-    };
+    // --- Tomorrow's date for the second card --- 
+    function updateTomorrowDate() {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
 
-    /*Render function*/
-    function renderAgenda(data) {
-        const agendaWrap = document.getElementById("sessionAgenda");
-        const list = document.getElementById("agendaList");
-        const notes = document.getElementById("agendaNotes");
-
-        if (!data.isTrainingDay) {
-            agendaWrap.style.display = "none"; // Hide agenda section on rest days
-            return;
-        }
-
-        // show agenda section 
-        agendaWrap.style.display = "";
-
-        // Populate agenda list
-        list.innerHTML = "";
-        if (Array.isArray(data.agenda) && data.agenda.length) {
-            data.agenda.forEach(item => {
-                const li = document.createElement("li");
-                li.textContent = item;
-                list.appendChild(li);
-            });
-        } else {
-            // graceful empty state
-            const li = document.createElement("li");
-            li.textContent = "Agenda to be announced.";
-            list.appendChild(li);
-        }
-        
-        // notes (optional)
-        notes.textContent = data.notes || "";
+        const options = { weekday: 'short', month: 'short', day: 'numeric'};
+        document.getElementById("date-1").textContent = tomorrow.toLocaleDateString('en-US', options);
     }
 
+    updateTomorrowDate();
 
-    function renderSessionCard(data) {
-        const info = document.querySelector(".session-info");
-        const titleEl = document.getElementById("session-title");
-        const timeEl = document.getElementById("session-time");
-        const locEl = document.getElementById("session-location");
-        const action = document.getElementById("sessionAction");
+    // --- Day after tomorrow --- 
+    function updateDayAfterDate () {
+        const dayAfter = new Date();
+        dayAfter.setDate(dayAfter.getDate() + 2);
+
+        const options = { weekday: 'short', month: 'short', day: 'numeric'};
+        document.getElementById("date-2").textContent = dayAfter.toLocaleDateString('en-US', options);
+    }
+
+    updateDayAfterDate();
+    
+/* Session Information */
+    const session = [
+        {
+            // card 0: today 
+            isTrainingDay: true,
+            title: "Training & Open Play",
+            time: "4:00 PM - 6:00 PM",
+            location: "The Village Sports Club",
+            restMessage: "No session today. Recover well and come back stronger!",
+            agenda: [
+                "Dynamic warm-up & ball control",
+                "Passing drills",
+                "Scrimmage game",
+            ],
+            notes: "Wear official home kit."
+        },
+        {
+            // card 1: tomorrow 
+            isTrainingDay: false,  // Change this to true or false to toggle modes
+            title: "Training & Open Play",
+            time: "4:00 PM - 7:00 PM",
+            location: "BGC turf",
+            restMessage: "Rest day. Focus on recovery!",
+            agenda: [
+                "Tactical positioning",
+                "Finishing practice",
+                "Small-sided games"
+            ],
+            notes: "Wear blue and white."
+        },
+        {
+            isTrainingDay: true,
+            title: "Training & Open Play",
+            time: "4:00 PM - 6:00 PM",
+            location: "The Village Sports Club",
+            restMessage: "Rest Day! Do you own shi",
+            agenda: [
+                "Conditioning",
+                "Passing drills",
+                "5v5 small sided play",
+            ],
+            notes: "Wear pink kampilan kit."
+        }
+    ];
+     
+    /*Render function*/
+    function renderSessionCard(idx, data) {
+        const info = document.getElementById(`session-${idx}`);
+        const titleEl = document.getElementById(`session-title-${idx}`);
+        const timeEl = document.getElementById(`session-time-${idx}`);
+        const locEl = document.getElementById(`session-location-${idx}`);
+        const action = document.getElementById(`sessionAction-${idx}`);
+        const agendaList = document.getElementById(`agendaList-${idx}`);
+        const agendaNotes = document.getElementById(`agendaNotes-${idx}`);
+        const agendaWrap = document.getElementById(`sessionAgenda-${idx}`);
 
         if (data.isTrainingDay) {
-            // Training Mode 
             info.classList.remove("rest");
             titleEl.className = "";
             titleEl.textContent = data.title;
-            timeEl.textContent = data.time;
+            timeEl.textContent = data.time; 
             locEl.textContent = data.location;
-            action.style.display = "flex";    //show join button
+            action.style.display = "flex";
+
+            // agenda
+            agendaWrap.style.display = "";
+            agendaList.innerHTML = data.agenda.map(item => `<li>${item}</li>`).join("");
+            agendaNotes.textContent = data.notes || "";
         } else {
-            // Rest Mode
             info.classList.add("rest");
-            titleEl.className = "session-rest-title";
-            titleEl.textContent = "Rest Day";
+            titleEl.className ="session-rest-title";
+            titleEl.textContent ="Rest Day";
             timeEl.textContent = "";
             locEl.innerHTML = `<span class="session-rest-msg">${data.restMessage}</span>`;
-            action.style.display = "none";      //hide join button
+            action.style.display = "none";
+
+            // hide agenda
+            agendaWrap.style.display = "none";
         }
     }
 
-    renderSessionCard(session);
-    renderAgenda(session);
-
-
+    session.forEach((s, i) => {
+        renderSessionCard(i, s);
+        wireJoinButton(i);
+    });
+    
     /* Join Button Functionality */
-    const joinButton = document.getElementById("join-button");
+    function wireJoinButton(idx) {
+        const btn = document.getElementById(`join-button-${idx}`);
+        if (!btn) return; 
 
-    joinButton.addEventListener("click", () => {
-        if (joinButton.textContent === "I'm in") {
-            joinButton.textContent = "Cancel";
-            joinButton.style.background = "#e63946"; // Change to red
-        } else {
-            joinButton.textContent = "I'm in";
-            joinButton.style.background = "#0b6ef6"; // Change back to original color
-        }
+        btn.addEventListener("click", () => {
+            if (btn.textContent === "I'm in") {
+                btn.textContent = "Cancel";
+                btn.style.background = "#e63946"; // red
+            } else {
+                btn.textContent = "I'm in";
+                btn.style.background = "#0b6ef6"; // blue
+            }
+        });
+    }
+
+    // ===== SLIDER CORE =====
+    const track = document.querySelector('.slider-track')
+    const slides = Array.from(track.children);
+    const dots = Array.from(document.querySelectorAll('.dot'));
+
+    let current = 0; 
+    let slideWidth = slides[0].getBoundingClientRect().width;
+
+    // Mouse drag setup 
+    let startX = 0; 
+    let currentX = 0; 
+    let isDragging = false; 
+    let deltaX = 0; 
+
+    function measure() {
+        // Recalculate width on resize so it stays responsive 
+        slideWidth = slides[0].getBoundingClientRect().width;
+        goTo(current, false); // reposition without animation 
+    }
+
+    function goTo(index, animate = true) {
+        // Clamp between 0 and last slide 
+        current = Math.max(0, Math.min(index, slides.length - 1));
+        track.style.transition = animate ? 'transform 300ms ease' :  'none';
+        track.style.transform = `translateX(-${current * slideWidth}px)`;
+        dots.forEach((d, i) => d.classList.toggle('active', i ===current));
+    }
+
+    function next() { goTo(current + 1); }
+    function prev() { goTo(current - 1); }
+
+    // Dots navigation 
+    dots.forEach((d, i) => d.addEventListener('click', () => goTo(i)));
+
+    //Keybaord arrows 
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') next();
+        if (e.key === 'ArrowLeft') prev();
     });
 
+    // Mouse drag control 
+    const dragThreshold = 60; // pixels needed to trigger a slide change 
+
+    track.addEventListener('mousedown', (e) => {
+        isDragging = true; 
+        startX = e.clientX; 
+        currentX = startX;
+        track.style.transition = 'none';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return; 
+        currentX = e.clientX; 
+        deltaX = currentX - startX;
+
+        // move the track visually 
+        track.style.transform = `translateX(${ -current * slideWidth + deltaX }px)`;
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (!isDragging) return; 
+        isDragging = false;
+        track.style.transition = 'transform 0.3s ease'; 
+
+        // decide direction 
+        if (Math.abs(deltaX) > dragThreshold) {
+            if (deltaX > 0) goTo(current - 1); // dragged right -> previous slide 
+            else goTo(current + 1); // dragged left -> next slide 
+        } else {
+            goTo(current); // not enough movement -> snap back 
+        }
+
+        deltaX = 0; // reset for next drage 
+    }); 
+
+    // snap back if user leaves window mid-drag 
+    window.addEventListener('mouseleave', () => {
+        if (isDragging) {
+            isDragging = false;
+            track.style.transition = 'transform 0.3s ease'; 
+            goTo(current);
+            deltaX = 0; 
+        }
+    });
+   
+    // On load + on resize
+    window.addEventListener('resize', measure);
+    measure();
