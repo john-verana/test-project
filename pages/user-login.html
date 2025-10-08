@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kampilan FC</title>
+  <link rel="stylesheet" href="../css/user-login.css">
+</head>
+<body>
+  <main class="login-container">
+    <div class="login-card">
+      <h1 class="brand">Kampilan FC</h1>
+      <p class="instruction">
+        Create a username <strong>(3–20)</strong> characters.<br>
+        Allowed: letters, numbers, underscores (_) and dots (.).
+      </p>
+
+      <form id="registerForm" novalidate>
+        <input 
+          id="username"
+          type="text"
+          placeholder="Enter your username"
+          required
+          />
+          <button id="registeBtn" class="btn">Register</button>
+      </form>
+
+      <div class="loader" id="loader"></div>
+      <p id="message" class="message" aria-live="polite"></p>
+    </div>
+  </main>
+
+  <script src="../js/user-login.js"></script>
+</body>
+</html>
